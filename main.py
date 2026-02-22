@@ -8,7 +8,7 @@ import time
 import os   
 import pickle
 
-# macOS specific: PyAutoGUI is used for mouse movement instead of ctypes
+
 pyautogui.FAILSAFE = False
 FRAME_MARGIN = 100
 DEAD_ZONE = 3   
@@ -19,14 +19,14 @@ PINCH_ON = 0.045
 PINCH_OFF = 0.07
 PINCH_FRAME_THRESHOLD = 4
 CLICK_COOLDOWN = 0.3
-MOVE_INTERVAL = 0.005 # Adjusted for Mac responsiveness
+MOVE_INTERVAL = 0.005 
 BLINK_THRESHOLD = 0.6
 BLINK_FRAME_THRESHOLD = 2
 SCROLL_FRAME_THRESHOLD = 2
-SCROLL_SCALE = 5 # Adjusted for Mac scrolling sensitivity
+SCROLL_SCALE = 5 
 SWIPE_THRESHOLD = 50
 
-# Ensure these files are in the same directory as main.py
+
 HAND_MODEL_PATH = "hand_landmarker.task"
 FACE_MODEL_PATH = "face_landmarker.task"
 
@@ -34,7 +34,7 @@ RECORD_FRAMES = 20
 GESTURE_THRESHOLD = 0.12
 CUSTOM_COOLDOWN = 1.0
 
-# Global states
+
 prev_x, prev_y = 0, 0
 last_move_time = 0
 pinching = False
@@ -114,7 +114,7 @@ def main():
             if face_detected:
                 hand_result = hand_landmarker.detect_for_video(mp_image, timestamp)
 
-                # Blink Detection for Clicking
+              
                 if face_result.face_blendshapes:
                     blendshapes = face_result.face_blendshapes[0]
                     left_blink = next((b.score for b in blendshapes if b.category_name == "eyeBlinkLeft"), 0)
@@ -133,7 +133,7 @@ def main():
                     landmarks = hand_result.hand_landmarks[0]
                     features = extract_features(landmarks)
                     
-                    # Recording Custom Gesture Logic
+                    
                     if recording:
                         record_buffer.append(features)
                         if len(record_buffer) >= RECORD_FRAMES:
@@ -145,7 +145,7 @@ def main():
                             recording = False
                             record_buffer.clear()
                     
-                    # Custom Gesture Matching
+                   
                     if not recording:
                         for name, template in gesture_database.items():
                             distance = np.linalg.norm(features - template)
@@ -160,7 +160,7 @@ def main():
                     ring_tip = landmarks[16]
                     pinky_tip = landmarks[20]
 
-                    # Pinch Calculation
+                  
                     dx_p, dy_p = index_tip.x - thumb_tip.x, index_tip.y - thumb_tip.y
                     pinch_distance = np.sqrt(dx_p**2 + dy_p**2)
                     pinch_filtered += (pinch_distance - pinch_filtered) * 0.3
@@ -175,7 +175,6 @@ def main():
                         pinch_frames = 0
                     if pinching: pinch_frames += 1
 
-                    # Cursor Movement Calculations
                     ix = np.clip(int(index_tip.x * w), FRAME_MARGIN, w - FRAME_MARGIN)
                     iy = np.clip(int(index_tip.y * h), FRAME_MARGIN, h - FRAME_MARGIN)
                     screen_x = np.interp(ix, [FRAME_MARGIN, w-FRAME_MARGIN], [0, screen_w])
@@ -187,7 +186,7 @@ def main():
                     curr_x = prev_x + (screen_x - prev_x) * alpha
                     curr_y = prev_y + (screen_y - prev_y) * alpha
 
-                    # Gesture States
+                 
                     idx_up = index_tip.y < landmarks[6].y
                     mid_up = middle_tip.y < landmarks[10].y
                     ring_up = ring_tip.y < landmarks[14].y
@@ -199,14 +198,14 @@ def main():
                     avg_ratio = (idx_ratio + mid_ratio) / 2
 
                     if not pinching:
-                        # Play/Pause Detection (4 fingers up)
+                       
                         if idx_up and mid_up and ring_up and pinky_up:
                             play_frames += 1
                             if play_frames > SCROLL_FRAME_THRESHOLD * 2 and time.time() - play_cooldown > 2.0:
                                 pyautogui.press('playpause')
                                 play_cooldown, play_frames = time.time(), 0
                         
-                        # Swipe/App Switch Detection (3 fingers up) - Mac uses Cmd+Tab
+                       
                         elif idx_up and mid_up and ring_up and not pinky_up:
                             swipe_frames += 1
                             if swipe_frames > SCROLL_FRAME_THRESHOLD and time.time() - swipe_cooldown > 1.0:
@@ -216,7 +215,7 @@ def main():
                                     else: pyautogui.hotkey('command', 'shift', 'tab')
                                     swipe_cooldown = time.time()
                         
-                        # Cursor Movement (Index up)
+                 
                         elif idx_ratio > 1.5 and mid_ratio < 1.2:
                             if abs(curr_x - prev_x) > DEAD_ZONE or abs(curr_y - prev_y) > DEAD_ZONE:
                                 if time.time() - last_move_time > MOVE_INTERVAL:
@@ -224,7 +223,7 @@ def main():
                                     prev_x, prev_y = curr_x, curr_y
                                     last_move_time = time.time()
                         
-                        # Scrolling
+                       
                         elif not ring_up and not pinky_up:
                             scroll_frames += 1
                             if scroll_frames > SCROLL_FRAME_THRESHOLD:
@@ -232,7 +231,7 @@ def main():
                                 if scroll_val != 0:
                                     pyautogui.scroll(scroll_val * SCROLL_SCALE)
                     else:
-                        # Drag while pinching
+                      
                         if time.time() - last_move_time > MOVE_INTERVAL:
                             pyautogui.dragTo(curr_x, curr_y, button='left')
                             prev_x, prev_y = curr_x, curr_y
