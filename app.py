@@ -22,6 +22,6 @@ def video_feed():
     return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 if __name__ == '__main__':
-    # Start the gesture logic in a separate thread
+   
     threading.Thread(target=gesture_main.main, daemon=True).start()
     app.run(host='0.0.0.0', port=5000)
