@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mac Gesture Control</title>
+    <style>
+        body { font-family: -apple-system, sans-serif; text-align: center; background: #f0f0f0; }
+        .container { margin-top: 50px; }
+        img { border: 10px solid #fff; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .controls { margin-top: 20px; color: #555; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Gesture Control Panel (Mac)</h1>
+        <img src="{{ url_for('video_feed') }}" width="800">
+        <div class="controls">
+            <p><strong>Commands:</strong></p>
+            <p>1 Finger Up: Move Cursor | Pinch: Click | Blink: Click</p>
+            <p>3 Fingers: Cmd+Tab (Swipe) | 4 Fingers: Play/Pause</p>
+            <p>Press <strong>'R'</strong> to record custom gesture | <strong>'Q'</strong> to quit</p>
+        </div>
+    </div>
+</body>
+</html>
